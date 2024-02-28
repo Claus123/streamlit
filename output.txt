@@ -1,0 +1,36 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# カードの初期状態を設定（例として3枚のカードを用意）
+N = 3
+
+A = [10**17, 2*10**17, 3*10**17] # 表面の値
+B = [4*10**17, 5*10**17, 6*10**17] # 裏面の値
+
+# カードの状態をビジュアライズする関数
+def visualize_cards(A, B, step):
+    x = np.arange(len(A))
+    fig, ax = plt.subplots()
+    ax.bar(x - 0.2, A, 0.4, label='Front')
+    ax.bar(x + 0.2, B, 0.4, label='Back')
+    ax.set_xlabel('Card Number')
+    ax.set_ylabel('Value')
+    ax.set_title(f'Card Values at Step {step}')
+    ax.set_xticks(x)
+    ax.set_xticklabels([f'Card {i+1}' for i in range(len(A))])
+    ax.legend()
+    plt.show()
+
+# 初期状態をビジュアライズ
+visualize_cards(A, B, step=0)
+
+# 操作をシミュレート（例：カード2とカード3を選んで操作を行う）
+def operate_cards(A, B, u, v):
+    A[u], A[v] = (A[u] + A[v]) // 2, (A[u] + A[v]) // 2
+    B[u], B[v] = (B[u] + B[v]) // 2, (B[u] + B[v]) // 2
+
+# 例として、カード2とカード3で操作を行う
+operate_cards(A, B, 1, 2)
+
+# 操作後の状態をビジュアライズ
+visualize_cards(A, B, step=1)

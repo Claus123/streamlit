@@ -1,41 +1,49 @@
 import streamlit as st
 import pandas as pd
 import copy
-import random as rd
 
-# カードの初期状態を設定（例として45枚のカードを用意）
-N = 45
+# ユーザーにカードの値を一括で入力させる
+cards_input = st.text_area('Enter the front and back values for each card, separated by spaces (e.g., "A1 B1 A2 B2 ... AN BN"):')
 
-# 表面の値をランダムに45個生成
-A = [rd.randint(10**17, 10**18) for _ in range(N)] 
-# 裏面の値をランダムに45個生成
-B = [rd.randint(10**17, 10**18) for _ in range(N)] 
+# 操作の詳細を入力させる
+operations_input = st.text_area('Enter the number of operations followed by each pair of card numbers for the operations, separated by spaces (e.g., "X u1 v1 u2 v2 ... uX vX"):')
 
-# カードの状態を保存するリスト
-states = [(copy.deepcopy(A), copy.deepcopy(B))]
+def parse_operations(input_str):
+    """入力された操作の文字列をパースして、操作回数とカードペアのリストを返す"""
+    items = list(map(int, input_str.split()))
+    num_operations = items[0]
+    pairs = [(items[i], items[i+1]) for i in range(1, len(items), 2)]
+    return num_operations, pairs
 
-# カードの状態をビジュアライズする関数
-def visualize_cards(A, B, step):
-    df = pd.DataFrame({'Front': A, 'Back': B})
-    st.write(f'Card Values at Step {step}')
-    st.bar_chart(df)
-
-# 操作をシミュレート
-def operate_cards(A, B, u, v):
-    A[u], A[v] = (A[u] + A[v]) // 2, (A[u] + A[v]) // 2
-    B[u], B[v] = (B[u] + B[v]) // 2, (B[u] + B[v]) // 2
-    states.append((copy.deepcopy(A), copy.deepcopy(B)))
-
-
-# 例として、ランダムなカード2枚を選んだ操作を50回行う
-for _ in range(50):
-    u, v = rd.sample(range(N), 2)
-    operate_cards(A, B, u, v)
-
-
-# stepごとのカードの状態をスライダーで表示
-step = st.slider('Step', 0, len(states)-1, 0)
-
-# スライダーを操作すると、カードの状態が変わる
-A_step, B_step = states[step]
-visualize_cards(A_step, B_step, step)
+if cards_input and operations_input:
+    values = list(map(int, cards_input.split()))
+    A = values[0::2]
+    B = values[1::2]
+    N = len(A)
+    states = [(copy.deepcopy(A), copy.deepcopy(B))]
+    
+    num_operations, operations = parse_operations(operations_input)
+    
+    # カードの状態をビジュアライズする関数
+    def visualize_cards(A, B, step):
+        df = pd.DataFrame({'Front': A, 'Back': B})
+        st.write(f'Card Values at Step {step}')
+        st.bar_chart(df)
+    
+    # 操作をシミュレート
+    def operate_cards(A, B, u, v):
+        A[u], A[v] = (A[u] + A[v]) // 2, (A[u] + A[v]) // 2
+        B[u], B[v] = (B[u] + B[v]) // 2, (B[u] + B[v]) // 2
+        states.append((copy.deepcopy(A), copy.deepcopy(B)))
+    
+    # ユーザーが入力した操作をシミュレート
+    for u, v in operations:
+        operate_cards(A, B, u-1, v-1)  # ユーザーが1から数えるためにインデックスを調整
+    
+    # ステップごとのカードの状態をスライダーで表示
+    if len(states) > 1:
+        step = st.slider('Step', 0, len(states)-1, 0)
+        A_step, B_step = states[step]
+        visualize_cards(A_step, B_step, step)
+else:
+    st.write("Please enter card values and operations above.")

@@ -24,12 +24,6 @@ if cards_input and operations_input:
     
     num_operations, operations = parse_operations(operations_input)
     
-    # カードの状態をビジュアライズする関数
-    def visualize_cards(A, B, step):
-        df = pd.DataFrame({'Front': A, 'Back': B})
-        st.write(f'Card Values at Step {step}')
-        st.bar_chart(df)
-    
     # 操作をシミュレート
     def operate_cards(A, B, u, v):
         A[u], A[v] = (A[u] + A[v]) // 2, (A[u] + A[v]) // 2
@@ -40,10 +34,21 @@ if cards_input and operations_input:
     for u, v in operations:
         operate_cards(A, B, u-1, v-1)  # ユーザーが1から数えるためにインデックスを調整
     
+    # カードの状態をビジュアライズする関数
+    def visualize_cards(A, B):
+        df = pd.DataFrame({'Front': A, 'Back': B})
+        st.bar_chart(df)
+    
     # ステップごとのカードの状態をスライダーで表示
     if len(states) > 1:
         step = st.slider('Step', 0, len(states)-1, 0)
         A_step, B_step = states[step]
-        visualize_cards(A_step, B_step, step)
+        visualize_cards(A_step, B_step)
+        
+        # このステップにおけるV1 + V2の計算
+        V1 = abs(A_step[0] - 5*10**17)
+        V2 = abs(B_step[0] - 5*10**17)
+        sum_V1_V2 = V1 + V2
+        st.write(f"V1 + V2 at Step {step}: {sum_V1_V2}")
 else:
     st.write("Please enter card values and operations above.")
